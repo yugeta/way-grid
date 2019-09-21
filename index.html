@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>grid-column-1</title>
+  <link rel="stylesheet" href="column-1.css">
+  <script src="way_grid.js"></script>
+</head>
+<body>
+
+  <ul class="datas way-grid"></ul>
+
+  <script>
+    var datas = document.querySelector("ul.datas");
+    for(var i=0; i<10; i++){
+      var li = document.createElement("li");
+      li.innerHTML = "<div class='box' style='font-size:20px;'>"+i+"</div>";
+      var h = Math.floor(Math.random() * 100 ) + 50;
+      li.style.setProperty("height", h + "px","");
+      datas.appendChild(li);
+    }
+
+    
+    // new $$way_grid();
+  </script>
+
+  <script>
+    new $$way_grid({
+      column_count : "auto",
+      column_width : 200
+    });
+  </script>
+
+</body>
+</heml>

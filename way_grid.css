@@ -1,0 +1,15 @@
+
+[data-way-grid-base="1"]{
+  position : relative !important;
+  display  : block;
+}
+[data-way-grid-box="1"]{
+  position : absolute !important;
+
+  -webkit-transition-property: left, right, top;
+  -moz-transition-property: left, right, top;
+  -ms-transition-property: left, right, top;
+  -o-transition-property: left, right, top;
+  transition-property: left, right, top;
+  transition-duration: 0.7s;
+}
