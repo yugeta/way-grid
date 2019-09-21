@@ -72,6 +72,32 @@
     base.appendChild(css);
   };
 
+  // elementのstyle情報を取得
+  var __getStyle = function(e,s){
+    if(!s){return}
+    
+		//対象項目チェック;
+		if(typeof e == 'undefined' || e == null || !e){
+			e = document.body;
+		}
+		//属性チェック;
+		var d = '';
+		if(typeof e.currentStyle != 'undefined'){
+			d = e.currentStyle[__camelize(s)];
+			if(d == 'medium'){
+				d = "0";
+			}
+		}
+		else if(typeof document.defaultView != 'undefined'){
+			d = document.defaultView.getComputedStyle(e,'').getPropertyValue(s);
+		}
+		return d;
+  };
+  var __camelize = function(v){
+		if(typeof(v)!='string'){return}
+		return v.replace(/-([a-z])/g , function(m){return m.charAt(1).toUpperCase();});
+	};
+
   // [共通関数] JS読み込み時の実行タイミング処理（body読み込み後にJS実行する場合に使用）
 	var __construct = function(){
     switch(document.readyState){
@@ -83,12 +109,9 @@
   
   var __options = {
     baseSelector : ".way-grid",
-    // column_count : "auto",
-    // column_width : 200
-    column_count : 3,
-    column_width : "auto"
-    // column_count : 2,
-    // column_width : 200
+    column_count : "auto",
+    column_width : 200,
+    $ : null
   };
 
 
@@ -98,14 +121,6 @@
       case "interactive" : __event(window , "DOMContentLoaded" , (function(options,e){this.start(options)}).bind(this,options));break;
       default            : __event(window , "load" , (function(options,e){this.start(options)}).bind(this,options));break;
 		}
-    // setTimeout(__construct,100);
-
-    // // option初期設定
-    // this.replaceOptions(options);
-    // // 初期設定
-    // this.initBase();
-    // // 並べ設定
-    // this.setBases();
   };
   
   $$.prototype.start = function(options){
@@ -138,16 +153,33 @@
       bases[i].setAttribute("data-way-grid-base","1");
       this.initBoxes(bases[i]);
     }
-    __event(window , "resize" , (function(){this.resize()}).bind(this));
+
+    this.resize_flg = null;
+    __event(window , "resize" , (function(){
+      if(this.resize_flg !== null){
+        clearTimeout(this.resize_flg);
+        this.resize_flg = null;
+      }
+      this.resize_flg = setTimeout((function(){this.resize()}).bind(this),300);
+    }).bind(this));
   };
 
   $$.prototype.resize = function(){
+
+    if(!this.resize_count){
+      this.resize_count = 1;
+    }
+    else{
+      this.resize_count++;
+    }
+
     var bases = document.querySelectorAll(this.options.baseSelector);
     if(!bases){return;}
     for(var i=0; i<bases.length; i++){
       this.setBoxes(bases[i]);
     }
   };
+
 
   // lists部分の初期設定
   $$.prototype.initBoxes = function(base){
@@ -187,27 +219,26 @@
       var column_width = this.options.column_width;
     }
     else if(this.options.column_width === "auto" && this.options.column_count === "auto"){
-// console.log("Error !!!");
+      console.log("Error !!!");
     }
     else{
       console.log("Error : way-grid (options column_count,column_width is fail.");
       return;
     }
-// console.log(column_count +"/"+ column_width);
 
     var boxes = base.querySelectorAll(":scope > *");
     var cols = 0;
-    var rows = 0;
+    // var rows = 0;
     var bottom_element = [];
     for(var i=0; i<boxes.length; i++){
       boxes[i].style.setProperty("width" , column_width + "px" , "");
       
       // 最上段処理
       if(bottom_element.length < column_count){
-        if(bottom_element[cols]){
-          top = bottom_element[cols].offsetTop + bottom_element[cols].offsetHeight;
-        }
+        var top = 0;
         boxes[i].style.setProperty("top"  , top  + "px" , "");
+        boxes[i].setAttribute("data-top" , top);
+
         var left = column_width * cols;
         boxes[i].style.setProperty("left" , left + "px" , "");
         bottom_element[cols] = boxes[i];
@@ -219,12 +250,13 @@
       // 次段以降の処理
       else{
         var bottom_datas = this.getMinPositions(bottom_element);
-// console.log(i);
-// console.log(bottom_datas);
         var top = bottom_datas.min_pos;
         boxes[i].style.setProperty("top"  , top  + "px" , "");
+        boxes[i].setAttribute("data-top" , top);
+
         var left = column_width * bottom_datas.min_col;
         boxes[i].style.setProperty("left" , left + "px" , "");
+
         bottom_element[bottom_datas.min_col] = boxes[i];
       }
     }
@@ -250,22 +282,18 @@
       min_col : null,
       min_pos : null
     };
-// console.log(elms);
     for(var i=0; i<elms.length; i++){
-      var bottom_pos = elms[i].offsetTop + elms[i].offsetHeight;
-// console.log(datas.min_pos +">"+ bottom_pos);
+      var top = Number(elms[i].getAttribute("data-top"));
+      var bottom_pos = top + elms[i].offsetHeight;
       if(datas.min_pos === null || datas.min_pos > bottom_pos){
         datas.min_pos = bottom_pos;
         datas.min_col = i;
       }
     }
-// console.log(datas);
     return datas;
   };
 
 
   __initCSS();
-  // __construct();
-  // return $$;
   return $$;
 })();
