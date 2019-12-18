@@ -1,7 +1,13 @@
 Way-Grid
 ==
+
+![title-banner](docs/banner.png)
+
+```
 Author : Yugeta.KOji
 Date   : 2019.09.22
+```
+
 
 # Summary
 Pinterest風のグリッドタイリング表示ライブラリ
